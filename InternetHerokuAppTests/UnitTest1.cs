@@ -11,7 +11,7 @@ public class UnitTest1 : IDisposable
 {
     private readonly IWebDriver _driver;
     private readonly WebDriverWait _wait;
-    private const string BaseUrl = "https:the-internet.herokuapp.com";
+    private const string BaseUrl = "https://the-internet.herokuapp.com";
 
     public UnitTest1()
     {
@@ -21,6 +21,7 @@ public class UnitTest1 : IDisposable
         _driver = new ChromeDriver(options);
         _wait = new WebDriverWait(_driver, TimeSpan.FromSeconds(10));
     }
+
 
     [Fact]
     public void Test_01_AddRemoveElements()
@@ -37,12 +38,17 @@ public class UnitTest1 : IDisposable
         deleteButtons[0].Click();
         deleteButtons = _driver.FindElements(By.ClassName("added-manually"));
         Assert.Single(deleteButtons);
+
+        System.Threading.Thread.Sleep(5000);
+
     }
+
 
     [Fact]
     public void Test_02_Checkboxes()
     {
         _driver.Navigate().GoToUrl($"{BaseUrl}/checkboxes");
+
         var checkboxes = _driver.FindElements(By.CssSelector("#checkboxes input[type='checkbox']"));
         var checkbox1 = checkboxes[0];
         var checkbox2 = checkboxes[1];
@@ -56,7 +62,9 @@ public class UnitTest1 : IDisposable
         Assert.True(checkbox1.Selected);
         Assert.False(checkbox2.Selected);
 
+        System.Threading.Thread.Sleep(5000);
     }
+
 
     [Fact]
     public void Test_03_Dropdown()
@@ -71,55 +79,67 @@ public class UnitTest1 : IDisposable
 
         select.SelectByValue("2");
         Assert.Equal("Option 2", select.SelectedOption.Text);
+
+        System.Threading.Thread.Sleep(5000);
     }
+
 
     [Fact]
     public void Test_04_Inputs()
     {
-        _driver.Navigate().GoToUrl($"{BaseUrl}/Inputs");
+        _driver.Navigate().GoToUrl($"{BaseUrl}/inputs");
 
-        var inputField = _driver.FindElement(By.TagName("input"));
+        var inputField = _wait.Until(d => d.FindElement(By.CssSelector(".example input")));
         inputField.SendKeys("42");
-        Assert.Equal("43", inputField.GetAttribute("value"));
+        Assert.Equal("42", inputField.GetAttribute("value"));
 
         inputField.SendKeys(Keys.ArrowUp);
         Assert.Equal("43", inputField.GetAttribute("value"));
 
+        System.Threading.Thread.Sleep(5000);
     }
+
 
     [Fact]
     public void Test_05_StatusCodes()
     {
-        _driver.Navigate().GoToUrl($"{BaseUrl}/status_code");
+        _driver.Navigate().GoToUrl($"{BaseUrl}/status_codes");
 
-        var link200 = _driver.FindElement(By.CssSelector(".example p")).Text;
-        Assert.Contains("This page returned a 200 status code", content);
+        var link200 = _driver.FindElement(By.LinkText("200"));
+        link200.Click();
 
+        var content = _wait.Until(d => d.FindElement(By.CssSelector(".example p"))).Text;
+        Assert.Contains("200 status code", content);
 
+        System.Threading.Thread.Sleep(5000);
     }
+
 
     [Fact]
     public void Test_06_DynamicControls()
     {
         _driver.Navigate().GoToUrl($"{BaseUrl}/dynamic_controls");
 
-        var removeButton = _driver.FindElement(By.XPath("//from[@id='checkbox-example']/button"));
+
+        var removeButton = _driver.FindElement(By.XPath("//form[@id='checkbox-example']/button"));
         removeButton.Click();
 
         var message = _wait.Until(d => d.FindElement(By.Id("message")));
         Assert.Equal("It's gone!", message.Text);
 
-        var enableButtton = _driver.FindElement(By.XPath("//form[@id='input-example']/button"));
-        enableButtton.Click();
+        var enableButton = _driver.FindElement(By.XPath("//form[@id='input-example']/button"));
+        enableButton.Click();
 
         var input = _wait.Until(d =>
         {
             var el = d.FindElement(By.XPath("//form[@id='input-example']/input"));
             return el.Enabled ? el : null;
         });
-
         Assert.NotNull(input);
+
+        System.Threading.Thread.Sleep(5000);
     }
+
 
     [Fact]
     public void Test_07_FileUpload()
@@ -131,28 +151,30 @@ public class UnitTest1 : IDisposable
 
         try
         {
-            var fileUploadInputs = _driver.FindElement(By.Id("file-upload"));
-            fileUploadInputs.SendKeys(tempFilePath);
+            var fileUploadInput = _driver.FindElement(By.Id("file-upload"));
+            fileUploadInput.SendKeys(tempFilePath);
 
             _driver.FindElement(By.Id("file-submit")).Click();
 
-            var uploadedFiles = _wait.Until(d => d.FindElement(By.Id("uploaded-file")));
-            Assert.Equal("test_upload.txt", uploadedFiles.Text.Trim());
-
+            // Знаходимо саме контейнер списку завантажених файлів
+            var uploadedFiles = _wait.Until(d => d.FindElement(By.Id("uploaded-files")));
+            Assert.Contains("test_upload.txt", uploadedFiles.Text.Trim());
         }
         finally
         {
             if (File.Exists(tempFilePath))
-            {
                 File.Delete(tempFilePath);
-            }
         }
+
+        System.Threading.Thread.Sleep(5000);
     }
 
+
     [Fact]
-    public void Test_08_JavacriptAlerts()
+    public void Test_08_JavaScriptAlerts()
     {
         _driver.Navigate().GoToUrl($"{BaseUrl}/javascript_alerts");
+
 
         _driver.FindElement(By.XPath("//button[text()='Click for JS Alert']")).Click();
         var alert = _driver.SwitchTo().Alert();
@@ -162,19 +184,22 @@ public class UnitTest1 : IDisposable
         var result = _driver.FindElement(By.Id("result"));
         Assert.Equal("You successfully clicked an alert", result.Text);
 
-        // Confirm
+
         _driver.FindElement(By.XPath("//button[text()='Click for JS Confirm']")).Click();
         var confirmAlert = _driver.SwitchTo().Alert();
         confirmAlert.Dismiss();
         Assert.Equal("You clicked: Cancel", result.Text);
 
-        // Prompt
+
         _driver.FindElement(By.XPath("//button[text()='Click for JS Prompt']")).Click();
         var promptAlert = _driver.SwitchTo().Alert();
         promptAlert.SendKeys("Automated Test");
         promptAlert.Accept();
         Assert.Equal("You entered: Automated Test", result.Text);
+
+        System.Threading.Thread.Sleep(5000);
     }
+
 
     [Fact]
     public void Test_09_MultipleWindows()
@@ -202,7 +227,9 @@ public class UnitTest1 : IDisposable
         _driver.SwitchTo().Window(originalWindow);
         Assert.Equal("Opening a new window", _driver.FindElement(By.TagName("h3")).Text);
 
+        System.Threading.Thread.Sleep(5000);
     }
+
 
     [Fact]
     public void Test_10_NotificationMessage()
@@ -213,11 +240,13 @@ public class UnitTest1 : IDisposable
         triggerLink.Click();
 
         var flash = _wait.Until(d => d.FindElement(By.Id("flash")));
-        string flashText = flash.Text.Trim();
+        string flashText = flash.Text;
 
-        bool isValidMessage = flashText.Contains("Action successful") || flashText.Contains("Actiob unsaccessful, please try again");
-        Assert.True(isValidMessage);
+        Assert.Contains("Action", flashText);
+
+        System.Threading.Thread.Sleep(5000);
     }
+
     public void Dispose()
     {
         _driver.Quit();

@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("InternetHerokuAppTests")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+0d25ab025208bc31f8e9274994836eb66b24705a")]
 [assembly: System.Reflection.AssemblyProductAttribute("InternetHerokuAppTests")]
 [assembly: System.Reflection.AssemblyTitleAttribute("InternetHerokuAppTests")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
