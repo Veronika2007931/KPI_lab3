@@ -156,7 +156,7 @@ public class UnitTest1 : IDisposable
 
             _driver.FindElement(By.Id("file-submit")).Click();
 
-            // Знаходимо саме контейнер списку завантажених файлів
+
             var uploadedFiles = _wait.Until(d => d.FindElement(By.Id("uploaded-files")));
             Assert.Contains("test_upload.txt", uploadedFiles.Text.Trim());
         }
